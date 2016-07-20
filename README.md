@@ -1,5 +1,5 @@
 # Material Design for Angular 2
-
+[![NPM Version](https://badge.fury.io/js/%40angular2-material%2Fcore.svg)](https://www.npmjs.com/package/%2540angular2-material%2Fcore)
 [![Build Status](https://travis-ci.org/angular/material2.svg?branch=master)](https://travis-ci.org/angular/material2)
 [![Gitter](https://badges.gitter.im/angular/material2.svg)](https://gitter.im/angular/material2?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -8,27 +8,8 @@ This is the home for the Angular team's Material Design components built on top 
 ### Project status
 The alpha has begun! See the [changelog](CHANGELOG.md) for more information.
 
-Individual components can be installed with `npm`:
-```bash
-# The core module is required as a peerDependency for other components
-npm install --save @angular2-material/core @angular2-material/checkbox
-```
-
-If you're using SystemJS as your module loader, your configuration for the angular-material
-packages should look like:
-```js
-// The core package is required as a peerDependency for other components.
-'@angular2-material/core': {
-  format: 'cjs',
-  defaultExtension: 'js',
-  main: 'core.js'
-},
-'@angular2-material/checkbox': {
-  format: 'cjs',
-  defaultExtension: 'js',
-  main: 'checkbox.js'
-},
-```
+You also might want to check out our [Getting Started Guide](https://github.com/angular/material2/blob/master/GETTING_STARTED.md) if you're 
+building your first project with Angular Material 2.
 
 During alpha, breaking API and behavior changes will be occurring regularly.
 
@@ -42,7 +23,8 @@ Also see our [`Good for community contribution`](https://github.com/angular/mate
 
 #### Quick links
 [Google group](https://groups.google.com/forum/#!forum/angular-material2),
-[Contributing](https://github.com/angular/material2/blob/master/CONTRIBUTING.md)
+[Contributing](https://github.com/angular/material2/blob/master/CONTRIBUTING.md),
+[Plunker Template](http://plnkr.co/edit/o077B6uEiiIgkC0S06dd?p=preview)
 
 ## The goal of Angular Material
 Our goal is to build a set of high-quality UI components built with Angular 2 and TypeScript, 

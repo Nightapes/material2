@@ -1,23 +1,26 @@
-import {Component} from 'angular2/core';
-import {MdCheckbox} from '../../components/checkbox/checkbox';
+import {Component} from '@angular/core';
+import {NgFor} from '@angular/common';
+import {FORM_DIRECTIVES} from '@angular/forms';
+import {MdCheckbox} from '@angular2-material/checkbox/checkbox';
 
-interface Task {
+export interface Task {
   name: string;
   completed: boolean;
   subtasks?: Task[];
 }
 
 @Component({
+  moduleId: module.id,
   selector: 'md-checkbox-demo-nested-checklist',
   styles: [`
     li {
       margin-bottom: 4px;
     }
   `],
-  templateUrl: 'demo-app/checkbox/nested-checklist.html',
-  directives: [MdCheckbox]
+  templateUrl: 'nested-checklist.html',
+  directives: [MdCheckbox, NgFor]
 })
-class MdCheckboxDemoNestedChecklist {
+export class MdCheckboxDemoNestedChecklist {
   tasks: Task[] = [
     {
       name: 'Reminders',
@@ -39,8 +42,11 @@ class MdCheckboxDemoNestedChecklist {
     }
   ];
 
-  allComplete(tasks: Task[]): boolean {
-    return tasks.every(t => t.completed);
+  allComplete(task: Task): boolean {
+    let subtasks = task.subtasks;
+    return subtasks.every(t => t.completed) ? true
+        : subtasks.every(t => !t.completed) ? false
+        : task.completed;
   }
 
   someComplete(tasks: Task[]): boolean {
@@ -51,17 +57,14 @@ class MdCheckboxDemoNestedChecklist {
   setAllCompleted(tasks: Task[], completed: boolean) {
     tasks.forEach(t => t.completed = completed);
   }
-
-  updateOnSubtaskChange(task: Task) {
-    task.completed = this.allComplete(task.subtasks);
-  }
 }
 
 @Component({
+  moduleId: module.id,
   selector: 'md-checkbox-demo',
-  templateUrl: 'demo-app/checkbox/checkbox-demo.html',
-  styleUrls: ['demo-app/checkbox/checkbox-demo.css'],
-  directives: [MdCheckbox, MdCheckboxDemoNestedChecklist]
+  templateUrl: 'checkbox-demo.html',
+  styleUrls: ['checkbox-demo.css'],
+  directives: [MdCheckbox, MdCheckboxDemoNestedChecklist, FORM_DIRECTIVES]
 })
 export class CheckboxDemo {
   isIndeterminate: boolean = false;

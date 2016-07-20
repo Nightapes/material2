@@ -15,7 +15,7 @@ A demo of the checkbox can be found at https://plnkr.co/edit/P7qce8lN9n2flS6kBhD
 
 ```html
 <ul>
-  <li *ngFor="#todo of todos">
+  <li *ngFor="let todo of todos">
     <md-checkbox [checked]="todo.completed"
                  (change)="todo.completed = $event">
       {{todo.name}}
@@ -27,7 +27,7 @@ A demo of the checkbox can be found at https://plnkr.co/edit/P7qce8lN9n2flS6kBhD
 ### Usage within Forms
 
 In addition to supporting native checkbox functionality, `md-checkbox` also supports `[(ngModel)]`
-and `ngControl` for use within forms.
+for use within forms.
 
 ```html
 <form (submit)="saveUser()">

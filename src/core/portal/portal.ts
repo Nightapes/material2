@@ -1,15 +1,20 @@
-import {TemplateRef, Type} from 'angular2/core';
-import {ElementRef} from 'angular2/core';
-import {ComponentRef} from 'angular2/core';
-
 import {
-  MdNullPortalHostException,
-  MdPortalAlreadyAttachedException,
-  MdNoPortalAttachedException,
-  MdNullPortalException,
-  MdPortalHostAlreadyDisposedException,
-  MdUnknownPortalTypeException
-} from './portal-exceptions';
+    TemplateRef,
+    ViewContainerRef,
+    ElementRef,
+    ComponentRef,
+    Injector
+} from '@angular/core';
+import {
+    MdNullPortalHostError,
+    MdPortalAlreadyAttachedError,
+    MdNoPortalAttachedError,
+    MdNullPortalError,
+    MdPortalHostAlreadyDisposedError,
+    MdUnknownPortalTypeError
+} from './portal-errors';
+import {ComponentType} from '../overlay/generic-component-type';
+
 
 
 /**
@@ -22,11 +27,11 @@ export abstract class Portal<T> {
   /** Attach this portal to a host. */
   attach(host: PortalHost): Promise<T> {
     if (host == null) {
-      throw new MdNullPortalHostException();
+      throw new MdNullPortalHostError();
     }
 
     if (host.hasAttached()) {
-      throw new MdPortalAlreadyAttachedException();
+      throw new MdPortalAlreadyAttachedError();
     }
 
     this._attachedHost = host;
@@ -37,7 +42,7 @@ export abstract class Portal<T> {
   detach(): Promise<void> {
     let host = this._attachedHost;
     if (host == null) {
-      throw new MdNoPortalAttachedException();
+      throw new MdNoPortalAttachedError();
     }
 
     this._attachedHost = null;
@@ -62,21 +67,28 @@ export abstract class Portal<T> {
 /**
  * A `ComponentPortal` is a portal that instantiates some Component upon attachment.
  */
-export class ComponentPortal extends Portal<ComponentRef> {
+export class ComponentPortal<T> extends Portal<ComponentRef<T>> {
   /** The type of the component that will be instantiated for attachment. */
-  public component: Type;
+  component: ComponentType<T>;
 
   /**
    * [Optional] Where the attached component should live in Angular's *logical* component tree.
    * This is different from where the component *renders*, which is determined by the PortalHost.
    * The origin necessary when the host is outside of the Angular application context.
    */
-  public origin: ElementRef;
+  viewContainerRef: ViewContainerRef;
 
-  constructor(component: Type, origin: ElementRef = null) {
+  /** [Optional] Injector used for the instantiation of the component. */
+  injector: Injector;
+
+  constructor(
+      component: ComponentType<T>,
+      viewContainerRef: ViewContainerRef = null,
+      injector: Injector = null) {
     super();
     this.component = component;
-    this.origin = origin;
+    this.viewContainerRef = viewContainerRef;
+    this.injector = injector;
   }
 }
 
@@ -86,7 +98,10 @@ export class ComponentPortal extends Portal<ComponentRef> {
  */
 export class TemplatePortal extends Portal<Map<string, any>> {
   /** The embedded template that will be used to instantiate an embedded View in the host. */
-  templateRef: TemplateRef;
+  templateRef: TemplateRef<any>;
+
+  /** Reference to the ViewContainer into which the template will be stamped out. */
+  viewContainerRef: ViewContainerRef;
 
   /**
    * Additional locals for the instantiated embedded view.
@@ -96,9 +111,10 @@ export class TemplatePortal extends Portal<Map<string, any>> {
    */
   locals: Map<string, any> = new Map<string, any>();
 
-  constructor(template: TemplateRef) {
+  constructor(template: TemplateRef<any>, viewContainerRef: ViewContainerRef) {
     super();
     this.templateRef = template;
+    this.viewContainerRef = viewContainerRef;
   }
 
   get origin(): ElementRef {
@@ -152,15 +168,15 @@ export abstract class BasePortalHost implements PortalHost {
 
   attach(portal: Portal<any>): Promise<any> {
     if (portal == null) {
-      throw new MdNullPortalException();
+      throw new MdNullPortalError();
     }
 
     if (this.hasAttached()) {
-      throw new MdPortalAlreadyAttachedException();
+      throw new MdPortalAlreadyAttachedError();
     }
 
     if (this._isDisposed) {
-      throw new MdPortalHostAlreadyDisposedException();
+      throw new MdPortalHostAlreadyDisposedError();
     }
 
     if (portal instanceof ComponentPortal) {
@@ -171,10 +187,10 @@ export abstract class BasePortalHost implements PortalHost {
       return this.attachTemplatePortal(portal);
     }
 
-    throw new MdUnknownPortalTypeException();
+    throw new MdUnknownPortalTypeError();
   }
 
-  abstract attachComponentPortal(portal: ComponentPortal): Promise<ComponentRef>;
+  abstract attachComponentPortal<T>(portal: ComponentPortal<T>): Promise<ComponentRef<T>>;
 
   abstract attachTemplatePortal(portal: TemplatePortal): Promise<Map<string, any>>;
 

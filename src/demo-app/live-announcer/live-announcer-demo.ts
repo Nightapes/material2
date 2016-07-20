@@ -1,9 +1,10 @@
-import {Component} from 'angular2/core';
-import {MdLiveAnnouncer} from '../../core/live-announcer/live-announcer';
+import {Component} from '@angular/core';
+import {MdLiveAnnouncer} from '@angular2-material/core/a11y/live-announcer';
 
 @Component({
+  moduleId: module.id,
   selector: 'toolbar-demo',
-  templateUrl: 'demo-app/live-announcer/live-announcer-demo.html',
+  templateUrl: 'live-announcer-demo.html',
 })
 export class LiveAnnouncerDemo {
 

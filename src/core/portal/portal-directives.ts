@@ -2,11 +2,12 @@ import {
     ComponentRef,
     Directive,
     TemplateRef,
-    DynamicComponentLoader,
-    ElementRef,
+    ComponentResolver,
     ViewContainerRef
-} from 'angular2/core';
+} from '@angular/core';
 import {Portal, TemplatePortal, ComponentPortal, BasePortalHost} from './portal';
+
+
 
 /**
  * Directive version of a `TemplatePortal`. Because the directive *is* a TemplatePortal,
@@ -22,8 +23,8 @@ import {Portal, TemplatePortal, ComponentPortal, BasePortalHost} from './portal'
   exportAs: 'portal',
 })
 export class TemplatePortalDirective extends TemplatePortal {
-  constructor(templateRef: TemplateRef) {
-    super(templateRef);
+  constructor(templateRef: TemplateRef<any>, viewContainerRef: ViewContainerRef) {
+    super(templateRef, viewContainerRef);
   }
 }
 
@@ -44,8 +45,7 @@ export class PortalHostDirective extends BasePortalHost {
   private _portal: Portal<any>;
 
   constructor(
-      private _dynamicComponentLoader: DynamicComponentLoader,
-      private _elementRef: ElementRef,
+      private _componentResolver: ComponentResolver,
       private _viewContainerRef: ViewContainerRef) {
     super();
   }
@@ -58,28 +58,31 @@ export class PortalHostDirective extends BasePortalHost {
     this._replaceAttachedPortal(p);
   }
 
-  /** Attach the given ComponentPortal to this PortlHost using the DynamicComponentLoader. */
-  attachComponentPortal(portal: ComponentPortal): Promise<ComponentRef> {
+  /** Attach the given ComponentPortal to this PortlHost using the ComponentResolver. */
+  attachComponentPortal<T>(portal: ComponentPortal<T>): Promise<ComponentRef<T>> {
     portal.setAttachedHost(this);
 
     // If the portal specifies an origin, use that as the logical location of the component
     // in the application tree. Otherwise use the location of this PortalHost.
-    let elementRef = portal.origin != null ? portal.origin : this._elementRef;
+    let viewContainerRef = portal.viewContainerRef != null ?
+        portal.viewContainerRef :
+        this._viewContainerRef;
 
-    // Typecast is necessary for Dart transpilation.
-    return this._dynamicComponentLoader.loadNextToLocation(portal.component, elementRef)
-      .then(ref => {
-        this.setDisposeFn(() => ref.dispose());
-        return ref;
-      });
+    return this._componentResolver.resolveComponent(portal.component).then(componentFactory => {
+      let ref = viewContainerRef.createComponent(
+          componentFactory, viewContainerRef.length,
+          portal.injector || viewContainerRef.parentInjector);
+
+      this.setDisposeFn(() => ref.destroy());
+      return ref;
+    });
   }
 
   /** Attach the given TemplatePortal to this PortlHost as an embedded View. */
   attachTemplatePortal(portal: TemplatePortal): Promise<Map<string, any>> {
     portal.setAttachedHost(this);
 
-    let viewRef = this._viewContainerRef.createEmbeddedView(portal.templateRef);
-    portal.locals.forEach((v, k) => viewRef.setLocal(k, v));
+    this._viewContainerRef.createEmbeddedView(portal.templateRef);
     this.setDisposeFn(() => this._viewContainerRef.clear());
 
     // TODO(jelbourn): return locals from view
@@ -88,13 +91,15 @@ export class PortalHostDirective extends BasePortalHost {
 
   /** Detatches the currently attached Portal (if there is one) and attaches the given Portal. */
   private _replaceAttachedPortal(p: Portal<any>): void {
-    let maybeDetach = this.hasAttached() ? this.detach() : Promise.resolve();
+    let maybeDetach = this.hasAttached() ? this.detach() : Promise.resolve(null);
 
     maybeDetach.then(() => {
-      if (p != null) {
+      if (p) {
         this.attach(p);
         this._portal = p;
       }
     });
   }
 }
+
+export const PORTAL_DIRECTIVES = [TemplatePortalDirective, PortalHostDirective];

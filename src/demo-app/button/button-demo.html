@@ -3,21 +3,21 @@
     <button md-button>flat</button>
     <button md-raised-button>raised</button>
     <button md-fab>
-      <i class="material-icons md-24">check</i>
+      <md-icon class="md-24">check</md-icon>
     </button>
     <button md-mini-fab>
-      <i class="material-icons md-24">check</i>
+      <md-icon class="md-24">check</md-icon>
     </button>
   </section>
 
   <section>
-    <a href="http://www.google.com" md-button color="primary">link</a>
-    <a href="http://www.google.com" md-raised-button>link</a>
+    <a href="http://www.google.com" md-button color="primary">SEARCH</a>
+    <a href="http://www.google.com" md-raised-button>SEARCH</a>
     <a href="http://www.google.com" md-fab>
-      <i class="material-icons md-24">check</i>
+      <md-icon class="md-24">check</md-icon>
     </a>
     <a href="http://www.google.com" md-mini-fab>
-      <i class="material-icons md-24">check</i>
+      <md-icon class="md-24">check</md-icon>
     </a>
   </section>
 
@@ -35,57 +35,58 @@
 
   <section>
     <button md-fab color="primary">
-      <i class="material-icons md-24">home</i>
+      <md-icon class="md-24">home</md-icon>
     </button>
     <button md-fab color="accent">
-      <i class="material-icons md-24">favorite</i>
+      <md-icon class="md-24">favorite</md-icon>
     </button>
     <button md-fab color="warn">
-      <i class="material-icons md-24">feedback</i>
+      <md-icon class="md-24">feedback</md-icon>
     </button>
   </section>
 
   <section>
     <button md-icon-button color="primary">
-      <i class="material-icons md-24">menu</i>
+      <md-icon class="md-24">menu</md-icon>
     </button>
 
     <button md-icon-button color="accent">
-      <i class="material-icons md-24">favorite</i>
+      <md-icon class="md-24">favorite</md-icon>
     </button>
 
     <button md-icon-button>
-      <i class="material-icons md-24">more_vert</i>
+      <md-icon class="md-24">more_vert</md-icon>
     </button>
   </section>
 
   <section>
     <div>
-      <p>isDisabled: {{isDisabled}}, clickCounter: <span id="clickCounter">{{clickCounter}}</span></p>
-      <button md-raised-button (click)="isDisabled=!isDisabled" id="disableToggle">Disable buttons</button>
+      <p>isDisabled: {{isDisabled}}, clickCounter: <span>{{clickCounter}}</span></p>
+      <button md-raised-button (click)="isDisabled=!isDisabled">
+        Disable buttons
+      </button>
+      <button md-raised-button (click)="button1.focus()">Focus 1</button>
+      <button md-raised-button (click)="button2.focus()">Focus 2</button>
+      <button md-raised-button (click)="button3.focus()">Focus 3</button>
     </div>
-    <button md-button [disabled]="isDisabled" (click)="clickCounter=clickCounter+1" id="testButton">off</button>
+    <button md-button #button1 [disabled]="isDisabled" (click)="clickCounter=clickCounter+1">off</button>
     <button md-button color="primary" [disabled]="isDisabled">off</button>
-    <a href="http://www.google.com" md-button color="accent" [disabled]="isDisabled">off</a>
-    <button md-raised-button color="primary" [disabled]="isDisabled">off</button>
+    <a href="http://www.google.com" #button2 md-button color="accent" [disabled]="isDisabled">off</a>
+    <button md-raised-button #button3 color="primary" [disabled]="isDisabled">off</button>
     <button md-mini-fab [disabled]="isDisabled">
-      <i class="material-icons md-24">check</i>
+      <md-icon class="md-24">check</md-icon>
     </button>
 
     <button md-icon-button color="accent" [disabled]="isDisabled">
-      <i class="material-icons md-24">favorite</i>
+      <md-icon class="md-24">favorite</md-icon>
     </button>
   </section>
   <section>
-    Link
-    <a href="http://www.google.com" md-button color="primary">link</a>
-    Button
-    <button md-button>flat</button>
+    <a href="http://www.google.com" md-button color="primary">SEARCH</a>
+    <button md-button>DANCE</button>
   </section>
   <section>
-    Link
-    <a href="http://www.google.com" md-raised-button color="primary">link</a>
-    Button
-    <button md-raised-button>button</button>
+    <a href="http://www.google.com" md-raised-button color="primary">SEARCH</a>
+    <button md-raised-button>DANCE</button>
   </section>
 </div>

@@ -1,16 +1,19 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input
-} from 'angular2/core';
-import {Renderer} from 'angular2/core';
-import {ElementRef} from 'angular2/core';
+  Input,
+  ViewEncapsulation
+} from '@angular/core';
+import {Renderer} from '@angular/core';
+import {ElementRef} from '@angular/core';
 
 @Component({
+  moduleId: module.id,
   selector: 'md-toolbar',
-  templateUrl: './components/toolbar/toolbar.html',
-  styleUrls: ['./components/toolbar/toolbar.css'],
+  templateUrl: 'toolbar.html',
+  styleUrls: ['toolbar.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class MdToolbar {
 
@@ -27,16 +30,18 @@ export class MdToolbar {
     this._updateColor(value);
   }
 
-  _updateColor(newColor: string) {
+  private _updateColor(newColor: string) {
     this._setElementColor(this._color, false);
     this._setElementColor(newColor, true);
     this._color = newColor;
   }
 
-  _setElementColor(color: string, isAdd: boolean) {
+  private _setElementColor(color: string, isAdd: boolean) {
     if (color != null && color != '') {
       this.renderer.setElementClass(this.elementRef.nativeElement, `md-${color}`, isAdd);
     }
   }
 
 }
+
+export const MD_TOOLBAR_DIRECTIVES = [MdToolbar];

@@ -1,16 +1,19 @@
-import {Component} from 'angular2/core';
-import {PortalHostDirective} from '../../core/portal/portal-directives';
-import {TemplatePortalDirective} from '../../core/portal/portal-directives';
-import {Portal} from '../../core/portal/portal';
-import {ViewChildren} from 'angular2/core';
-import {QueryList} from 'angular2/core';
-import {ComponentPortal} from '../../core/portal/portal';
+import {Component, ViewChildren, QueryList} from '@angular/core';
+import {NgFor} from '@angular/common';
+import {
+    Portal,
+    ComponentPortal,
+    TemplatePortalDirective,
+    PortalHostDirective
+} from '@angular2-material/core/core';
+
 
 @Component({
+  moduleId: module.id,
   selector: 'portal-demo',
-  templateUrl: 'demo-app/portal/portal-demo.html',
-  styleUrls: ['demo-app/portal/portal-demo.css'],
-  directives: [TemplatePortalDirective, PortalHostDirective]
+  templateUrl: 'portal-demo.html',
+  styleUrls: ['portal-demo.css'],
+  directives: [TemplatePortalDirective, PortalHostDirective, NgFor]
 })
 export class PortalDemo {
   @ViewChildren(TemplatePortalDirective) templatePortals: QueryList<Portal<any>>;
@@ -32,7 +35,8 @@ export class PortalDemo {
 
 
 @Component({
+  moduleId: module.id,
   selector: 'science-joke',
   template: `<p> 100 kilopascals go into a bar. </p>`
 })
-class ScienceJoke { }
+export class ScienceJoke { }

@@ -1,6 +1,6 @@
-import {DynamicComponentLoader, AppViewManager, ComponentRef} from 'angular2/core';
+import {ComponentResolver, ComponentRef, EmbeddedViewRef} from '@angular/core';
 import {BasePortalHost, ComponentPortal, TemplatePortal} from './portal';
-import {MdComponentPortalAttachedToDomWithoutOriginException} from './portal-exceptions';
+import {MdComponentPortalAttachedToDomWithoutOriginError} from './portal-errors';
 
 
 /**
@@ -12,30 +12,32 @@ import {MdComponentPortalAttachedToDomWithoutOriginException} from './portal-exc
 export class DomPortalHost extends BasePortalHost {
   constructor(
       private _hostDomElement: Element,
-      private _componentLoader: DynamicComponentLoader,
-      private _viewManager: AppViewManager) {
+      private _componentResolver: ComponentResolver) {
     super();
   }
 
-  /** Attach the given ComponentPortal to DOM element using the DynamicComponentLoader. */
-  attachComponentPortal(portal: ComponentPortal): Promise<ComponentRef> {
-    if (portal.origin == null) {
-      throw new MdComponentPortalAttachedToDomWithoutOriginException();
+  /** Attach the given ComponentPortal to DOM element using the ComponentResolver. */
+  attachComponentPortal<T>(portal: ComponentPortal<T>): Promise<ComponentRef<T>> {
+    if (portal.viewContainerRef == null) {
+      throw new MdComponentPortalAttachedToDomWithoutOriginError();
     }
 
-    return this._componentLoader.loadNextToLocation(portal.component, portal.origin).then(ref => {
-      this._hostDomElement.appendChild(ref.hostView.rootNodes[0]);
-      this.setDisposeFn(() => ref.dispose());
+    return this._componentResolver.resolveComponent(portal.component).then(componentFactory => {
+      let ref = portal.viewContainerRef.createComponent(
+          componentFactory,
+          portal.viewContainerRef.length,
+          portal.injector || portal.viewContainerRef.parentInjector);
+
+      let hostView = <EmbeddedViewRef<any>> ref.hostView;
+      this._hostDomElement.appendChild(hostView.rootNodes[0]);
+      this.setDisposeFn(() => ref.destroy());
       return ref;
     });
   }
 
   attachTemplatePortal(portal: TemplatePortal): Promise<Map<string, any>> {
-    let viewContainer = this._viewManager.getViewContainer(portal.templateRef.elementRef);
+    let viewContainer = portal.viewContainerRef;
     let viewRef = viewContainer.createEmbeddedView(portal.templateRef);
-    // TODO(jelbourn): locals don't currently work with DomPortalHost; investigate whether there
-    // is a bug in Angular.
-    portal.locals.forEach((v, k) => viewRef.setLocal(k, v));
 
     viewRef.rootNodes.forEach(rootNode => this._hostDomElement.appendChild(rootNode));
 

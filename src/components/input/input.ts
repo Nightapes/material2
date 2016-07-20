@@ -3,32 +3,39 @@ import {
   Component,
   HostBinding,
   Input,
-  Provider,
   Directive,
   AfterContentInit,
   ContentChild,
   SimpleChange,
   ContentChildren,
+  ViewChild,
+  ElementRef,
   QueryList,
   OnChanges,
-} from 'angular2/core';
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import {
   NG_VALUE_ACCESSOR,
-  ControlValueAccessor
-} from 'angular2/src/common/forms/directives/control_value_accessor';
-import {BaseException} from 'angular2/src/facade/exceptions';
-import {BooleanFieldValue} from '../../core/annotations/field-value';
+  ControlValueAccessor,
+  DefaultValueAccessor,
+  NgModel,
+} from '@angular/forms';
+import {NgIf} from '@angular/common';
+import {BooleanFieldValue} from '@angular2-material/core/annotations/field-value';
+import {MdError} from '@angular2-material/core/errors/error';
+import {Observable} from 'rxjs/Observable';
 
 
 const noop = () => {};
 
-const MD_INPUT_CONTROL_VALUE_ACCESSOR = new Provider(
-    NG_VALUE_ACCESSOR, {
-      useExisting: forwardRef(() => MdInput),
-      multi: true
-    });
+export const MD_INPUT_CONTROL_VALUE_ACCESSOR: any = {
+  provide: NG_VALUE_ACCESSOR,
+  useExisting: forwardRef(() => MdInput),
+  multi: true
+};
 
-// Invalid input type. Using one of these will throw an MdInputUnsupportedTypeException.
+// Invalid input type. Using one of these will throw an MdInputUnsupportedTypeError.
 const MD_INPUT_INVALID_INPUT_TYPE = [
   'file',
   'radio',
@@ -39,19 +46,19 @@ const MD_INPUT_INVALID_INPUT_TYPE = [
 let nextUniqueId = 0;
 
 
-export class MdInputPlaceholderConflictException extends BaseException {
+export class MdInputPlaceholderConflictError extends MdError {
   constructor() {
     super('Placeholder attribute and child element were both specified.');
   }
 }
 
-export class MdInputUnsupportedTypeException extends BaseException {
+export class MdInputUnsupportedTypeError extends MdError {
   constructor(type: string) {
     super(`Input type "${type}" isn't supported by md-input.`);
   }
 }
 
-export class MdInputDuplicatedHintException extends BaseException {
+export class MdInputDuplicatedHintError extends MdError {
   constructor(align: string) {
     super(`A hint was already declared for 'align="${align}"'.`);
   }
@@ -69,9 +76,7 @@ export class MdInputDuplicatedHintException extends BaseException {
 export class MdPlaceholder {}
 
 
-/**
- * The hint directive, used to tag content as hint labels (going under the input).
- */
+/** The hint directive, used to tag content as hint labels (going under the input). */
 @Directive({
   selector: 'md-hint',
   host: {
@@ -90,10 +95,13 @@ export class MdHint {
  * improve on its behaviour, along with styling it according to the Material Design.
  */
 @Component({
+  moduleId: module.id,
   selector: 'md-input',
-  templateUrl: 'components/input/input.html',
-  styleUrls: ['components/input/input.css'],
+  templateUrl: 'input.html',
+  styleUrls: ['input.css'],
   providers: [MD_INPUT_CONTROL_VALUE_ACCESSOR],
+  directives: [DefaultValueAccessor, NgIf, NgModel],
+  host: {'(click)' : 'focus()'}
 })
 export class MdInput implements ControlValueAccessor, AfterContentInit, OnChanges {
   private _focused: boolean = false;
@@ -116,8 +124,8 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
   /**
    * Content directives.
    */
-  @ContentChild(MdPlaceholder) private _placeholderChild: MdPlaceholder;
-  @ContentChildren(MdHint) private _hintChildren: QueryList<MdHint>;
+  @ContentChild(MdPlaceholder) _placeholderChild: MdPlaceholder;
+  @ContentChildren(MdHint) _hintChildren: QueryList<MdHint>;
 
   /** Readonly properties. */
   get focused() { return this._focused; }
@@ -125,23 +133,52 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
   get characterCount(): number {
     return this.empty ? 0 : ('' + this._value).length;
   }
+  get inputId(): string { return `${this.id}-input`; }
 
   /**
    * Bindings.
    */
   @Input() align: 'start' | 'end' = 'start';
   @Input() dividerColor: 'primary' | 'accent' | 'warn' = 'primary';
-  @Input() @BooleanFieldValue() disabled: boolean = false;
   @Input() @BooleanFieldValue() floatingPlaceholder: boolean = true;
   @Input() hintLabel: string = '';
+
+  @Input() autoComplete: string;
+  @Input() autoCorrect: string;
+  @Input() autoCapitalize: string;
+  @Input() @BooleanFieldValue() autoFocus: boolean = false;
+  @Input() @BooleanFieldValue() disabled: boolean = false;
   @Input() id: string = `md-input-${nextUniqueId++}`;
-  @Input() maxLength: number = -1;
-  @Input() placeholder: string;
+  @Input() list: string = null;
+  @Input() max: string | number = null;
+  @Input() maxLength: number = null;
+  @Input() min: string | number = null;
+  @Input() minLength: number = null;
+  @Input() placeholder: string = null;
+  @Input() @BooleanFieldValue() readOnly: boolean = false;
   @Input() @BooleanFieldValue() required: boolean = false;
+  @Input() @BooleanFieldValue() spellCheck: boolean = false;
+  @Input() step: number = null;
+  @Input() tabIndex: number = null;
   @Input() type: string = 'text';
+  @Input() name: string = null;
+
+  private _blurEmitter: EventEmitter<FocusEvent> = new EventEmitter<FocusEvent>();
+  private _focusEmitter: EventEmitter<FocusEvent> = new EventEmitter<FocusEvent>();
+
+  @Output('blur')
+  get onBlur(): Observable<FocusEvent> {
+    return this._blurEmitter.asObservable();
+  }
+
+  @Output('focus')
+  get onFocus(): Observable<FocusEvent> {
+    return this._focusEmitter.asObservable();
+  }
 
   get value(): any { return this._value; };
   @Input() set value(v: any) {
+    v = this._convertValueForInputType(v);
     if (v !== this._value) {
       this._value = v;
       this._onChangeCallback(v);
@@ -151,38 +188,61 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
   // This is to remove the `align` property of the `md-input` itself. Otherwise HTML5
   // might place it as RTL when we don't want to. We still want to use `align` as an
   // Input though, so we use HostBinding.
-  @HostBinding('attr.align') private get _align(): any { return null; }
+  @HostBinding('attr.align') get _align(): any { return null; }
 
-  /** @internal */
-  onFocus() {
-    this._focused = true;
+
+  @ViewChild('input') _inputElement: ElementRef;
+
+  /** Set focus on input */
+  focus() {
+    this._inputElement.nativeElement.focus();
   }
-  /** @internal */
-  onBlur() {
+
+  _handleFocus(event: FocusEvent) {
+    this._focused = true;
+    this._focusEmitter.emit(event);
+  }
+
+  _handleBlur(event: FocusEvent) {
     this._focused = false;
+    this._onTouchedCallback();
+    this._blurEmitter.emit(event);
+  }
+
+  _handleChange(event: Event) {
+    this.value = (<HTMLInputElement>event.target).value;
     this._onTouchedCallback();
   }
 
-  /** @internal */
-  hasPlaceholder(): boolean {
+  _hasPlaceholder(): boolean {
     return !!this.placeholder || this._placeholderChild != null;
   }
 
-  /** Implemented as part of ControlValueAccessor. */
+  /**
+   * Implemented as part of ControlValueAccessor.
+   * TODO: internal
+   */
   writeValue(value: any) {
     this._value = value;
   }
 
-  /** Implemented as part of ControlValueAccessor. */
+  /**
+   * Implemented as part of ControlValueAccessor.
+   * TODO: internal
+   */
   registerOnChange(fn: any) {
     this._onChangeCallback = fn;
   }
 
-  /** Implemented as part of ControlValueAccessor. */
+  /**
+   * Implemented as part of ControlValueAccessor.
+   * TODO: internal
+   */
   registerOnTouched(fn: any) {
     this._onTouchedCallback = fn;
   }
 
+  /** TODO: internal */
   ngAfterContentInit() {
     this._validateConstraints();
 
@@ -192,8 +252,22 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
     });
   }
 
+  /** TODO: internal */
   ngOnChanges(changes: {[key: string]: SimpleChange}) {
     this._validateConstraints();
+  }
+
+  /**
+   * Convert the value passed in to a value that is expected from the type of the md-input.
+   * This is normally performed by the *_VALUE_ACCESSOR in forms, but since the type is bound
+   * on our internal input it won't work locally.
+   * @private
+   */
+  private _convertValueForInputType(v: any): any {
+    switch (this.type) {
+      case 'number': return parseFloat(v);
+      default: return v;
+    }
   }
 
   /**
@@ -207,10 +281,10 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
    */
   private _validateConstraints() {
     if (this.placeholder != '' && this.placeholder != null && this._placeholderChild != null) {
-      throw new MdInputPlaceholderConflictException();
+      throw new MdInputPlaceholderConflictError();
     }
     if (MD_INPUT_INVALID_INPUT_TYPE.indexOf(this.type) != -1) {
-      throw new MdInputUnsupportedTypeException(this.type);
+      throw new MdInputUnsupportedTypeError(this.type);
     }
 
     if (this._hintChildren) {
@@ -220,12 +294,12 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
       this._hintChildren.forEach((hint: MdHint) => {
         if (hint.align == 'start') {
           if (startHint || this.hintLabel) {
-            throw new MdInputDuplicatedHintException('start');
+            throw new MdInputDuplicatedHintError('start');
           }
           startHint = hint;
         } else if (hint.align == 'end') {
           if (endHint) {
-            throw new MdInputDuplicatedHintException('end');
+            throw new MdInputDuplicatedHintError('end');
           }
           endHint = hint;
         }
@@ -234,8 +308,4 @@ export class MdInput implements ControlValueAccessor, AfterContentInit, OnChange
   }
 }
 
-export const MD_INPUT_DIRECTIVES: any[] = [
-  MdPlaceholder,
-  MdInput,
-  MdHint,
-];
+export const MD_INPUT_DIRECTIVES = [MdPlaceholder, MdInput, MdHint];

@@ -1,10 +1,11 @@
 
-@import "variables";
-@import "elevation";
+@import 'variables';
+@import 'elevation';
+@import 'button-mixins';
 
 // TODO(jelbourn): This goes away.
-@import "default-theme";
-@import "button-theme";
+@import 'default-theme';
+@import 'button-theme';
 
 // Flat and raised button standards
 $md-button-padding: 0 16px !default;
@@ -34,12 +35,7 @@ $md-mini-fab-padding: 8px !default;
   position: relative;
 
   // Reset browser <button> styles.
-  background: transparent;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  border: none;
+  @include md-button-reset();
 
   // Make anchors render like buttons.
   display: inline-block;
@@ -51,7 +47,8 @@ $md-mini-fab-padding: 8px !default;
   font-size: $md-body-font-size-base;
   font-family: $md-font-family;
   font-weight: 500;
-  color: md-color($md-foreground, text);
+  color: currentColor;
+  text-align: center;
 
   // Sizing.
   margin: $md-button-margin;
@@ -63,13 +60,17 @@ $md-mini-fab-padding: 8px !default;
   &[disabled] {
     cursor: default;
   }
+
+  &.md-button-focus {
+    @include md-button-focus();
+  }
 }
 
 // Applies styles to buttons with backgrounds: raised, fab, and mini-fab
 %md-raised-button {
   @extend %md-button-base;
 
-  @include md-elevation(1);
+  @include md-elevation(2);
   @include md-button-theme('color', default-contrast);
   @include md-button-theme('background-color');
 
@@ -82,12 +83,7 @@ $md-mini-fab-padding: 8px !default;
               md-elevation-transition-property-value();
 
   &:active {
-    @include md-elevation(2);
-  }
-
-  &.md-button-focus {
-    background-color: md-color($md-foreground, base, 0.12);
-    @include md-button-theme('background-color', 600);
+    @include md-elevation(8);
   }
 
   &[disabled] {
@@ -102,11 +98,12 @@ $md-mini-fab-padding: 8px !default;
   min-width: 0;
   border-radius: $md-fab-border-radius;
   background-color: md-color($md-accent);
+  color: md-color($md-accent, default-contrast);
   width: $size;
   height: $size;
-  padding: $padding;
+  padding: 0;
 
-  &.md-button-focus {
-    background-color: md-color($md-accent, 600);
+  i, md-icon {
+    padding: $padding 0;
   }
 }

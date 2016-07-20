@@ -1,3 +1,4 @@
+import {applyCssTransform} from '@angular2-material/core/style/apply-transform';
 import {PositionStrategy} from './position-strategy';
 
 
@@ -84,7 +85,10 @@ export class GlobalPositionStrategy implements PositionStrategy {
     return this;
   }
 
-  /** Apply the position to the element. */
+  /**
+   * Apply the position to the element.
+   * TODO: internal
+   */
   apply(element: HTMLElement): Promise<void> {
     element.style.position = this._cssPosition;
     element.style.top = this._top;
@@ -97,11 +101,9 @@ export class GlobalPositionStrategy implements PositionStrategy {
     let tranlateX = this._reduceTranslateValues('translateX', this._translateX);
     let translateY = this._reduceTranslateValues('translateY', this._translateY);
 
-    // It's important to trim the result, because the browser will ignore the set operation
-    // if the string contains only whitespace.
-    element.style.transform = `${tranlateX} ${translateY}`.trim();
+    applyCssTransform(element, `${tranlateX} ${translateY}`);
 
-    return Promise.resolve();
+    return Promise.resolve(null);
   }
 
   /** Reduce a list of translate values to a string that can be used in the transform property */

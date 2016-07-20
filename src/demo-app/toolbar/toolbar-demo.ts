@@ -1,11 +1,13 @@
-import {Component} from 'angular2/core';
-import {MdToolbar} from '../../components/toolbar/toolbar';
+import {Component} from '@angular/core';
+import {MdIcon} from '@angular2-material/icon/icon';
+import {MdToolbar} from '@angular2-material/toolbar/toolbar';
 
 @Component({
+  moduleId: module.id,
   selector: 'toolbar-demo',
-  templateUrl: 'demo-app/toolbar/toolbar-demo.html',
-  styleUrls: ['demo-app/toolbar/toolbar-demo.css'],
-  directives: [MdToolbar]
+  templateUrl: 'toolbar-demo.html',
+  styleUrls: ['toolbar-demo.css'],
+  directives: [MdToolbar, MdIcon]
 })
 export class ToolbarDemo {
 

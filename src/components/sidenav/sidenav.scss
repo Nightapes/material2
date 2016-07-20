@@ -1,7 +1,7 @@
-@import "default-theme";
-@import "mixins";
-@import "variables";
-@import "elevation";
+@import 'default-theme';
+@import 'mixins';
+@import 'variables';
+@import 'elevation';
 
 
 // We use invert() here to have the darken the background color expected to be used. If the
@@ -12,12 +12,12 @@ $md-sidenav-push-background-color: md-color($md-background, dialog) !default;
 
 
 /**
- * Mixin to help with defining LTR/RTL 'transform: translateX()' values.
+ * Mixin to help with defining LTR/RTL 'transform: translate3d()' values.
  * @param $open The translation value when the sidenav is opened.
  * @param $close The translation value when the sidenav is closed.
  */
 @mixin md-sidenav-transition($open, $close) {
-  transform: translateX($close);
+  transform: translate3d($close, 0, 0);
 
   &.md-sidenav-closed {
     // We use 'visibility: hidden | visible' because 'display: none' will not animate any
@@ -27,19 +27,28 @@ $md-sidenav-push-background-color: md-color($md-background, dialog) !default;
     visibility: hidden;
   }
   &.md-sidenav-closing {
-    transform: translateX($close);
+    transform: translate3d($close, 0, 0);
     will-change: transform;
   }
   &.md-sidenav-opening {
     @include md-elevation(1);
     visibility: visible;
-    transform: translateX($open);
+    transform: translate3d($open, 0, 0);
     will-change: transform;
   }
   &.md-sidenav-opened {
     @include md-elevation(1);
-    transform: translateX($open);
+    transform: translate3d($open, 0, 0);
   }
+}
+
+/* This mixin ensures a sidenav element spans the whole viewport.*/
+@mixin md-sidenav-fullscreen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 
@@ -51,19 +60,25 @@ $md-sidenav-push-background-color: md-color($md-background, dialog) !default;
   @include md-stacking-context();
 
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+
+  // TODO(hansl): Update this with a more robust solution.
+  &[fullscreen] {
+    @include md-sidenav-fullscreen();
+
+    &.md-sidenav-opened {
+      overflow: hidden;
+    }
+  }
 
   // Need this to take up space in the layout.
   display: block;
 
   // Hide the sidenavs when they're closed.
-  overflow-x: hidden;
+  overflow: hidden;
 
   & > .md-sidenav-backdrop {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    @include md-sidenav-fullscreen();
 
     display: block;
 
@@ -87,16 +102,22 @@ $md-sidenav-push-background-color: md-color($md-background, dialog) !default;
     @include md-stacking-context();
 
     display: block;
+    height: 100%;
+    overflow: auto;
   }
 
   > md-sidenav {
     @include md-stacking-context();
 
     display: block;
-    position: fixed;
+    position: absolute;
     top: 0;
     bottom: 0;
     z-index: 3;
+    min-width: 5%;
+
+    // TODO(kara): revisit scrolling behavior for sidenavs
+    overflow-y: auto;
 
     background-color: $md-sidenav-background-color;
 
@@ -119,7 +140,7 @@ $md-sidenav-push-background-color: md-color($md-background, dialog) !default;
 }
 
 
-:host-context([dir="rtl"]) {
+:host-context([dir='rtl']) {
   > md-sidenav {
     @include md-sidenav-transition(0, 100%);
 

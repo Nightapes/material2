@@ -2,6 +2,7 @@
 @import 'mixins';
 @import 'variables';
 
+$md-input-floating-placeholder-scale-factor: 0.75 !default;
 
 // Placeholder colors. Required is used for the `*` star shown in the placeholder.
 $md-input-placeholder-color: md-color($md-foreground, hint-text);
@@ -17,22 +18,29 @@ $md-input-underline-focused-color: md-color($md-primary);
 
 // Gradient for showing the dashed line when the input is disabled.
 $md-input-underline-disabled-background-image: linear-gradient(to right,
-        rgba(0,0,0,0.26) 0%, rgba(0,0,0,0.26) 33%, transparent 0%);
+        rgba(0, 0, 0, 0.26) 0%, rgba(0, 0, 0, 0.26) 33%, transparent 0%);
 
+/**
+ * Undo the red box-shadow glow added by Firefox on invalid inputs.
+ * See https://developer.mozilla.org/en-US/docs/Web/CSS/:-moz-ui-invalid
+ */
+:-moz-ui-invalid {
+  box-shadow: none;
+}
 
 /**
  * Applies a floating placeholder above the input itself.
  */
-%md-input-placeholder-floating {
-  visibility: visible;
+@mixin md-input-placeholder-floating {
+  display: block;
   padding-bottom: 5px;
-  transform: translateY(-100%) scale(0.75);
+  transform: translateY(-100%) scale($md-input-floating-placeholder-scale-factor);
+  width: 100% / $md-input-floating-placeholder-scale-factor;
 
   .md-placeholder-required {
     color: $md-input-required-placeholder-color;
   }
 }
-
 
 :host {
   display: inline-block;
@@ -69,6 +77,9 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
     // Font needs to be inherited, because by default <input> has a system font.
     font: inherit;
 
+    // The Material input should match whatever background it is above.
+    background: transparent;
+
     // By default, <input> has a padding, border, outline and a default width.
     border: none;
     outline: none;
@@ -94,7 +105,6 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
     left: 0;
     top: 0;
 
-    visibility: hidden;
     font-size: 100%;
     pointer-events: none;  // We shouldn't catch mouse events (let them through).
     color: $md-input-placeholder-color;
@@ -102,7 +112,7 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
 
     // Put ellipsis text overflow.
     width: 100%;
-    display: block;
+    display: none;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow-x: hidden;
@@ -111,16 +121,17 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
     transform-origin: bottom left;
     transition: transform $swift-ease-out-duration $swift-ease-out-timing-function,
                 scale $swift-ease-out-duration $swift-ease-out-timing-function,
-                color $swift-ease-out-duration $swift-ease-out-timing-function;
+                color $swift-ease-out-duration $swift-ease-out-timing-function,
+                width $swift-ease-out-duration $swift-ease-out-timing-function;
 
     &.md-empty {
-      visibility: visible;
+      display: block;
       cursor: text;
     }
 
     // Show the placeholder above the input when it's not empty, or focused.
     &.md-float:not(.md-empty), &.md-float.md-focused {
-      @extend %md-input-placeholder-floating;
+      @include md-input-placeholder-floating;
     }
 
     // :focus is applied to the input, but we apply md-focused to the other elements
@@ -143,7 +154,7 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
   // Once the autofill is committed, a change event happen and the regular md-input
   // classes take over to fulfill this behaviour.
   input:-webkit-autofill + .md-input-placeholder {
-    @extend %md-input-placeholder-floating;
+    @include md-input-placeholder-floating;
   }
 
   // The underline is what's shown under the input, its prefix and its suffix.
@@ -205,7 +216,7 @@ $md-input-underline-disabled-background-image: linear-gradient(to right,
 
 
 // RTL support.
-:host-context([dir="rtl"]) {
+:host-context([dir='rtl']) {
   text-align: right;
 
   .md-input-placeholder {

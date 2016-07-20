@@ -1,9 +1,10 @@
-@import "default-theme";
-@import "theme-functions";
-@import "variables";
+@import 'default-theme';
+@import 'theme-functions';
+@import 'variables';
+@import 'mixins';
 
 /** The width/height of the checkbox element. */
-$md-checkbox-size: 18px !default;
+$md-checkbox-size: $md-toggle-size !default;
 /** The width of the line used to draw the checkmark / mixedmark. */
 $md-checkbox-mark-stroke-size: 2/15 * $md-checkbox-size !default;
 /** The width of the checkbox border shown when the checkbox is unchecked. */
@@ -13,11 +14,11 @@ $md-checkbox-border-color: if($md-is-dark-theme, rgba(white, 0.7), rgba(black, 0
 /** The color of the checkbox's checkmark / mixedmark. */
 $md-checkbox-mark-color: md-color($md-background, background);
 /** The color that is used as the checkbox background when it is checked. */
-$md-checkbox-background-color: md-color($md-primary, 500);
+$md-checkbox-background-color: md-color($md-accent, 500);
 /** The base duration used for the majority of transitions for the checkbox. */
 $md-checkbox-transition-duration: 90ms;
 /** The amount of spacing between the checkbox and its label. */
-$md-checkbox-item-spacing: 4px;
+$md-checkbox-item-spacing: $md-toggle-padding;
 
 // Manual calculation done on SVG
 $_md-checkbox-mark-path-length: 22.910259;
@@ -216,12 +217,9 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
   pointer-events: none;
 }
 
-.md-checkbox {
-  cursor: pointer;
-
-  &:focus {
-    // TODO(traviskaufman): Add ink ripple on focus state, once ripple is implemented.
-    outline: none;
+md-checkbox {
+  &, label {
+    cursor: pointer;
   }
 }
 
@@ -242,12 +240,17 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
   white-space: nowrap;
   width: $md-checkbox-size;
 
-  [dir="rtl"] & {
-    margin:{
+  [dir='rtl'] & {
+    margin: {
       left: $md-checkbox-item-spacing;
       right: auto;
     }
   }
+}
+
+// TODO(kara): Remove this style when fixing vertical baseline
+.md-checkbox-layout .md-checkbox-label {
+  line-height: 24px;
 }
 
 .md-checkbox-frame {
@@ -263,8 +266,6 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
   @extend %md-checkbox-outer-box;
 
   align-items: center;
-  background-color: $md-checkbox-background-color;
-  opacity: 0;
   display: inline-flex;
   justify-content: center;
   transition: background-color $md-checkbox-transition-duration
@@ -309,7 +310,7 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
       right: auto;
     }
 
-    [dir="rtl"] & {
+    [dir='rtl'] & {
       margin: {
         left: auto;
         right: $md-checkbox-item-spacing;
@@ -332,13 +333,13 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
   }
 
   .md-checkbox-background {
-    opacity: 1;
+    background-color: $md-checkbox-background-color;
   }
 }
 
 .md-checkbox-indeterminate {
   .md-checkbox-background {
-    opacity: 1;
+    background-color: $md-checkbox-background-color;
   }
 
   .md-checkbox-checkmark {
@@ -353,6 +354,13 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
   .md-checkbox-mixedmark {
     opacity: 1;
     transform: scaleX(1) rotate(0deg);
+  }
+}
+
+
+.md-checkbox-unchecked {
+  .md-checkbox-background {
+    background-color: transparent;
   }
 }
 
@@ -386,7 +394,7 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
 
   &-unchecked-checked {
     .md-checkbox-background {
-      animation: $md-checkbox-transition-duration * 2 linear 0s md-checkbox-fade-in-background;
+      animation: $md-checkbox-transition-duration * 2 linear 0ms md-checkbox-fade-in-background;
     }
 
     .md-checkbox-checkmark-path {
@@ -394,65 +402,73 @@ $_md-checkbox-indeterminate-checked-easing-function: cubic-bezier(0.14, 0, 0, 1)
       // animation at 50% in order to prevent a flash of styles applied to a checked checkmark
       // as the background is fading in before the animation begins.
       animation:
-        $md-checkbox-transition-duration * 2 linear 0s md-checkbox-unchecked-checked-checkmark-path;
+        $md-checkbox-transition-duration * 2 linear 0ms md-checkbox-unchecked-checked-checkmark-path;
     }
   }
 
   &-unchecked-indeterminate {
     .md-checkbox-background {
-      animation: $md-checkbox-transition-duration * 2 linear 0s md-checkbox-fade-in-background;
+      animation: $md-checkbox-transition-duration * 2 linear 0ms md-checkbox-fade-in-background;
     }
 
     .md-checkbox-mixedmark {
       animation:
-        $md-checkbox-transition-duration linear 0s md-checkbox-unchecked-indeterminate-mixedmark;
+        $md-checkbox-transition-duration linear 0ms md-checkbox-unchecked-indeterminate-mixedmark;
     }
   }
 
   &-checked-unchecked {
     .md-checkbox-background {
-      animation: $md-checkbox-transition-duration * 2 linear 0s md-checkbox-fade-out-background;
+      animation: $md-checkbox-transition-duration * 2 linear 0ms md-checkbox-fade-out-background;
     }
 
     .md-checkbox-checkmark-path {
       animation:
-        $md-checkbox-transition-duration linear 0s md-checkbox-checked-unchecked-checkmark-path;
+        $md-checkbox-transition-duration linear 0ms md-checkbox-checked-unchecked-checkmark-path;
     }
   }
 
   &-checked-indeterminate {
     .md-checkbox-checkmark {
       animation:
-        $md-checkbox-transition-duration linear 0s md-checkbox-checked-indeterminate-checkmark;
+        $md-checkbox-transition-duration linear 0ms md-checkbox-checked-indeterminate-checkmark;
     }
 
     .md-checkbox-mixedmark {
       animation:
-        $md-checkbox-transition-duration linear 0s md-checkbox-checked-indeterminate-mixedmark;
+        $md-checkbox-transition-duration linear 0ms md-checkbox-checked-indeterminate-mixedmark;
     }
   }
 
   &-indeterminate-checked {
     .md-checkbox-checkmark {
       animation:
-        $indeterminate-change-duration linear 0s md-checkbox-indeterminate-checked-checkmark;
+        $indeterminate-change-duration linear 0ms md-checkbox-indeterminate-checked-checkmark;
     }
 
     .md-checkbox-mixedmark {
       animation:
-        $indeterminate-change-duration linear 0s md-checkbox-indeterminate-checked-mixedmark;
+        $indeterminate-change-duration linear 0ms md-checkbox-indeterminate-checked-mixedmark;
     }
   }
 
   &-indeterminate-unchecked {
     .md-checkbox-background {
-      animation: $md-checkbox-transition-duration * 2 linear 0s md-checkbox-fade-out-background;
+      animation: $md-checkbox-transition-duration * 2 linear 0ms md-checkbox-fade-out-background;
     }
 
     .md-checkbox-mixedmark {
       animation:
-        $indeterminate-change-duration * 0.6 linear 0s
+        $indeterminate-change-duration * 0.6 linear 0ms
         md-checkbox-indeterminate-unchecked-mixedmark;
     }
   }
 }
+
+// Underlying native input element.
+// Visually hidden but still able to respond to focus.
+.md-checkbox-input {
+  @include md-visually-hidden;
+}
+
+@include md-temporary-ink-ripple(checkbox);
