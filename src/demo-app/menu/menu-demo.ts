@@ -1,11 +1,20 @@
 import {Component} from '@angular/core';
-import {MD_MENU_DIRECTIVES} from '@angular2-material/menu/menu';
+
 
 @Component({
   moduleId: module.id,
   selector: 'menu-demo',
   templateUrl: 'menu-demo.html',
   styleUrls: ['menu-demo.css'],
-  directives: [MD_MENU_DIRECTIVES]
 })
-export class MenuDemo {}
+export class MenuDemo {
+  selected = '';
+  items = [
+    {text: 'Refresh'},
+    {text: 'Settings'},
+    {text: 'Help'},
+    {text: 'Sign Out', disabled: true}
+  ];
+
+  select(text: string) { this.selected = text; }
+}

@@ -1,4 +1,4 @@
-import {provideRouter, RouterConfig} from '@angular/router';
+import {provideRouter, Routes} from '@angular/router';
 import {Home} from './demo-app';
 import {ButtonDemo} from '../button/button-demo';
 import {BaselineDemo} from '../baseline/baseline-demo';
@@ -22,11 +22,12 @@ import {SidenavDemo} from '../sidenav/sidenav-demo';
 import {RadioDemo} from '../radio/radio-demo';
 import {CardDemo} from '../card/card-demo';
 import {MenuDemo} from '../menu/menu-demo';
+import {RippleDemo} from '../ripple/ripple-demo';
 import {DialogDemo} from '../dialog/dialog-demo';
+import {TooltipDemo} from '../tooltip/tooltip-demo';
 
 
-
-export const routes: RouterConfig = [
+export const routes: Routes = [
   {path: '', component: Home},
   {path: 'button', component: ButtonDemo},
   {path: 'card', component: CardDemo},
@@ -50,7 +51,9 @@ export const routes: RouterConfig = [
   {path: 'tabs', component: TabsDemo},
   {path: 'button-toggle', component: ButtonToggleDemo},
   {path: 'baseline', component: BaselineDemo},
+  {path: 'ripple', component: RippleDemo},
   {path: 'dialog', component: DialogDemo},
+  {path: 'tooltip', component: TooltipDemo},
 ];
 
 export const DEMO_APP_ROUTE_PROVIDER = provideRouter(routes);

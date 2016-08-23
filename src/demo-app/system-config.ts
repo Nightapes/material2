@@ -3,6 +3,7 @@
  **********************************************************************************************/
 
 const components = [
+  'all',
   'button',
   'card',
   'checkbox',
@@ -20,14 +21,9 @@ const components = [
   'slide-toggle',
   'button-toggle',
   'tabs',
-  'toolbar'
+  'toolbar',
+  'tooltip',
 ];
-
-/** Map relative paths to URLs. */
-const map: any = {
-  '@angular2-material/core': 'core',
-};
-components.forEach(name => map[`@angular2-material/${name}`] = `components/${name}`);
 
 
 /** User packages configuration. */
@@ -98,4 +94,4 @@ System.config({
 });
 
 // Apply the user's configuration.
-System.config({ map, packages });
+System.config({ packages });
