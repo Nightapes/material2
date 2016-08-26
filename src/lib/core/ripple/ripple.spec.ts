@@ -135,7 +135,7 @@ describe('MdRipple', () => {
       expect(rippleBackground.classList).toContain('md-ripple-active');
       expect(rippleElement.querySelectorAll('.md-ripple-foreground').length).toBe(0);
       // end() should deactivate the background and show the foreground ripple.
-      rippleComponent.end(0, 0);
+      rippleComponent.ripple(0, 0);
       expect(rippleBackground.classList).not.toContain('md-ripple-active');
       expect(rippleElement.querySelectorAll('.md-ripple-foreground').length).toBe(1);
     });
@@ -203,7 +203,7 @@ describe('MdRipple', () => {
       const color = 'rgba(22, 44, 66, 0.8)';
       controller.backgroundColor = color;
       fixture.detectChanges();
-      rippleComponent.start();
+      rippleComponent.end();
       expect(window.getComputedStyle(rippleBackground).backgroundColor).toBe(color);
     });
 
@@ -227,9 +227,9 @@ describe('MdRipple', () => {
       rippleElement.click();
       expect(rippleElement.querySelectorAll('.md-ripple-foreground').length).toBe(0);
       // Calling start() and end() should still create a ripple.
-      rippleComponent.start();
+      rippleComponent.end();
       expect(rippleBackground.classList).toContain('md-ripple-active');
-      rippleComponent.end(0, 0);
+      rippleComponent.ripple(0, 0);
       expect(rippleElement.querySelectorAll('.md-ripple-foreground').length).toBe(1);
     });
 

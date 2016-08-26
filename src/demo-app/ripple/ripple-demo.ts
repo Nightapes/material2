@@ -1,7 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {MdRipple} from '@angular2-material/core/core';
 
-
 @Component({
   moduleId: module.id,
   selector: 'ripple-demo',
@@ -20,12 +19,10 @@ export class RippleDemo {
   rippleColor = '';
   rippleBackgroundColor = '';
 
-  disableButtonRipples = false;
-
   doManualRipple() {
     if (this.manualRipple) {
-      window.setTimeout(() => this.manualRipple.start(), 10);
-      window.setTimeout(() => this.manualRipple.end(0, 0), 500);
+      this.manualRipple.ripple(0, 0);
+      window.setTimeout(() => this.manualRipple.end(), 400);
     }
   }
 }

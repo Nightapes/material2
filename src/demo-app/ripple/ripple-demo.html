@@ -1,17 +1,6 @@
 <!-- Use <md-card>? -->
 <div class="demo-ripple">
-  <section>
-    <md-checkbox [(ngModel)]="disableButtonRipples">Disable button ripples</md-checkbox>
-    <button md-button [disableRipple]="disableButtonRipples">flat</button>
-    <button md-raised-button [disableRipple]="disableButtonRipples">raised</button>
-    <button md-fab [disableRipple]="disableButtonRipples">
-      <md-icon>check</md-icon>
-    </button>
-    <button md-mini-fab [disableRipple]="disableButtonRipples">
-      <md-icon>check</md-icon>
-    </button>
-  </section>
-
+   <h1>Ripple configuration</h1>
   <section>
     <div class="demo-ripple-checkbox-option"><md-checkbox [(ngModel)]="centered">Centered</md-checkbox></div>
     <div class="demo-ripple-checkbox-option"><md-checkbox [(ngModel)]="unbounded">Unbounded</md-checkbox></div>
@@ -49,5 +38,18 @@
       Click me
     </div>
   </section>
-  {{centered.checked}} {{rounded.checked}}
+   <h1>Buttons with ripple</h1>
+  <section>
+    <button md-button md-ripple class="md-warn" [md-ripple-disabled]="disabledRipple">flat</button>
+    <button md-raised-button class="md-warn" md-ripple [md-ripple-disabled]="disabledRipple">raised</button>
+    <button md-raised-button class="md-primary" md-ripple [md-ripple-disabled]="disabledRipple">raised</button>
+    <button md-fab md-ripple [md-ripple-disabled]="disabledRipple">
+      <md-icon>check</md-icon>
+    </button>
+    <button md-mini-fab md-ripple [md-ripple-disabled]="disabledRipple">
+      <md-icon>check</md-icon>
+    </button>
+    <md-checkbox [(ngModel)]="disabledRipple">Disable button ripples</md-checkbox>
+  </section>
+
 </div>

@@ -26,7 +26,7 @@ export class MdRipple implements OnInit, OnDestroy, OnChanges {
    */
   // Prevent TS metadata emit from referencing HTMLElement in ripple.js
   // That breaks tests running in node that load material components.
-  @Input('md-ripple-trigger') trigger: HTMLElement|HTMLElement;
+  @Input('md-ripple-trigger') trigger: HTMLElement | HTMLElement;
   /**
    * Whether the ripple always originates from the center of the host element's bounds, rather
    * than originating from the location of the click event.
@@ -59,6 +59,7 @@ export class MdRipple implements OnInit, OnDestroy, OnChanges {
   @HostBinding('class.md-ripple-unbounded') @Input('md-ripple-unbounded') unbounded: boolean;
 
   private _rippleRenderer: RippleRenderer;
+  private ripples: Element[] = [];
 
   constructor(_elementRef: ElementRef) {
     // These event handlers are attached to the element that triggers the ripple animations.
@@ -95,25 +96,27 @@ export class MdRipple implements OnInit, OnDestroy, OnChanges {
   /**
    * Responds to the start of a ripple animation trigger by fading the background in.
    */
-  start() {
-    this._rippleRenderer.fadeInRippleBackground(this.backgroundColor);
+  end() {
+    this.ripples.forEach(ripple => {
+      this._rippleRenderer.fadeOutForegroundRipple(ripple);
+    });
+    this.ripples = [];
   }
 
   /**
-   * Responds to the end of a ripple animation trigger by fading the background out, and creating a
-   * foreground ripple that expands from the event location (or from the center of the element if
-   * the "centered" property is set or forceCenter is true).
+   * Responds to the start of a ripple animation trigger by fading the background out, and 
+   * creating a foreground ripple that expands from the event location 
+   * (or from the center of the element if the "centered" property is set or forceCenter is true).
    */
-  end(left: number, top: number, forceCenter = true) {
-    this._rippleRenderer.createForegroundRipple(
+  ripple(left: number, top: number, forceCenter = true) {
+    this.ripples.push(this._rippleRenderer.createForegroundRipple(
       left,
       top,
       this.color,
       this.centered || forceCenter,
       this.maxRadius,
       this.speedFactor,
-      (ripple: ForegroundRipple, e: TransitionEvent) => this._rippleTransitionEnded(ripple, e));
-    this._rippleRenderer.fadeOutRippleBackground();
+      (ripple: ForegroundRipple, e: TransitionEvent) => this._rippleTransitionEnded(ripple, e)));
   }
 
   private _rippleTransitionEnded(ripple: ForegroundRipple, event: TransitionEvent) {
@@ -126,19 +129,19 @@ export class MdRipple implements OnInit, OnDestroy, OnChanges {
           ripple.state = ForegroundRippleState.FADING_OUT;
           break;
         case ForegroundRippleState.FADING_OUT:
-          this._rippleRenderer.removeRippleFromDom(ripple.rippleElement);
+          //this._rippleRenderer.removeRippleFromDom(ripple.rippleElement);
           break;
       }
     }
   }
 
   /**
-   * Called when the trigger element receives a mousedown event. Starts the ripple animation by
+   * Called when the trigger element receives a mouseleave event. Starts the ripple animation by
    * fading in the background.
    */
-  private _mouseDown(event: MouseEvent) {
+  private _mouseLeave(event: MouseEvent) {
     if (!this.disabled && event.button === 0) {
-      this.start();
+      this.end();
     }
   }
 
@@ -148,21 +151,24 @@ export class MdRipple implements OnInit, OnDestroy, OnChanges {
    */
   private _click(event: MouseEvent) {
     if (!this.disabled && event.button === 0) {
-      // If screen and page positions are all 0, this was probably triggered by a keypress.
-      // In that case, use the center of the bounding rect as the ripple origin.
-      // FIXME: This fails on IE11, which still sets pageX/Y and screenX/Y on keyboard clicks.
-      const isKeyEvent =
-          (event.screenX === 0 && event.screenY === 0 && event.pageX === 0 && event.pageY === 0);
-      this.end(event.pageX, event.pageY, isKeyEvent);
+      this.end();
     }
   }
 
   /**
-   * Called when the trigger element receives a mouseleave event. Fades out the background.
+   * Called when the trigger element receives a mousedown event. Fades out the background.
    */
-  private _mouseLeave(event: MouseEvent) {
+  private _mouseDown(event: MouseEvent) {
     // We can always fade out the background here; It's a no-op if it was already inactive.
     this._rippleRenderer.fadeOutRippleBackground();
+    if (!this.disabled && event.button === 0) {
+      // If screen and page positions are all 0, this was probably triggered by a keypress.
+      // In that case, use the center of the bounding rect as the ripple origin.
+      // FIXME: This fails on IE11, which still sets pageX/Y and screenX/Y on keyboard clicks.
+      const isKeyEvent =
+        (event.screenX === 0 && event.screenY === 0 && event.pageX === 0 && event.pageY === 0);
+      this.ripple(event.pageX, event.pageY, isKeyEvent);
+    }
   }
 
   // TODO: Reactivate the background div if the user drags out and back in.
