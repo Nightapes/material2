@@ -40,6 +40,13 @@ export class MdCardSubtitle {}
 })
 export class MdCardActions {}
 
+/**
+ * Footer of a card, needed as it's used as a selector in the API.
+ */
+@Directive({
+  selector: 'md-card-footer'
+})
+export class MdCardFooter {}
 
 /*
 
@@ -118,11 +125,11 @@ export class MdCardTitleGroup {}
 @NgModule({
   exports: [
     MdCard, MdCardHeader, MdCardTitleGroup, MdCardContent, MdCardTitle, MdCardSubtitle,
-    MdCardActions
+    MdCardActions, MdCardFooter
   ],
   declarations: [
     MdCard, MdCardHeader, MdCardTitleGroup, MdCardContent, MdCardTitle, MdCardSubtitle,
-    MdCardActions
+    MdCardActions, MdCardFooter
   ],
 })
 export class MdCardModule {
